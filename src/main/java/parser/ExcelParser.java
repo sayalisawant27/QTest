@@ -28,8 +28,6 @@ public class ExcelParser {
 
         OutputStream fileOut = new FileOutputStream(file);
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        sheet.setColumnWidth(0,20);
-        sheet.setColumnWidth(1,40);
         JSONArray keys = jsonObject.names();
         Row row1 = sheet.createRow(rowCount);
         row1.createCell(0).setCellValue(timestamp + "  " + message);
