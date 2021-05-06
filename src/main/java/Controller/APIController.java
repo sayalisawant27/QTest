@@ -1,4 +1,4 @@
-package Controller;
+package controller;
 
 import api.DefectAPI;
 import api.LoginAPI;

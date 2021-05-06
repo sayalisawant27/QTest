@@ -1,9 +1,8 @@
 package api;
 
 import com.squareup.okhttp.*;
-import org.json.JSONArray;
 import org.json.JSONObject;
-import parser.ExcelParser;
+import parser.JsonToExcelParser;
 
 public class LoginAPI {
 
@@ -18,12 +17,13 @@ public class LoginAPI {
                 .addHeader("content-type", "application/x-www-form-urlencoded")
                 .addHeader("authorization", "Basic c2F5YWxpLnNhd2FudEBjb2duaXphbnQuY29tOg==")
                 .build();
+
         Response response = client.newCall(request).execute();
         String jsonData = response.body().string();
 
         JSONObject jsonObject=new JSONObject(jsonData);
-        ExcelParser excelParser = new ExcelParser();
-        excelParser.createLog(jsonObject, "Login Authentication...");
+        JsonToExcelParser jsonToExcelParser = new JsonToExcelParser();
+        jsonToExcelParser.createLog(jsonObject, "Login Authentication...");
 
 
         return jsonObject;

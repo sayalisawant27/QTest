@@ -2,79 +2,66 @@ package api;
 
 import com.squareup.okhttp.*;
 import org.json.JSONArray;
-import parser.ExcelParser;
+import parser.JsonToExcelParser;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class RequirementAPI {
 
-    public ExcelParser excelParser;
-    public List<String> columnKeys;
-    public List<String> linkKeys;
-    public List<String> propertiesKeys;
+    public JsonToExcelParser jsonToExcelParser;
+    public static List<String> columnKeys = new ArrayList<String>();
+    public static List<String> linkKeys = new ArrayList<String>();
+    public static List<String> propertiesKeys = new ArrayList<String>();
 
-    public void initRequirementAPI(JSONArray jsonArray){
-        Iterator<String> keyNames= jsonArray.getJSONObject(0).keys();
-        while(keyNames.hasNext()) {
-            columnKeys.add(keyNames.next());
+    public void initRequirementAPI(JSONArray jsonArray) {
+        Iterator<String> keyNames = jsonArray.getJSONObject(0).keys();
+        while (keyNames.hasNext()) {
+            String key= keyNames.next();
+            columnKeys.add(key);
         }
-        for(int i=0; i<jsonArray.length();i++) {
+
+
+
+        /*for (int i = 0; i < jsonArray.length(); i++) {
             for (int j = 0; j < ((JSONArray) jsonArray.getJSONObject(i).get("links")).length(); j++) {
                 JSONArray linkArray = new JSONArray(jsonArray.getJSONObject(i).get("links").toString());
-                Iterator<String> linkKeyNames= linkArray.getJSONObject(0).keys();
-                while(linkKeyNames.hasNext()) {
+                Iterator<String> linkKeyNames = linkArray.getJSONObject(0).keys();
+                while (linkKeyNames.hasNext()) {
                     linkKeys.add(linkKeyNames.next());
                 }
             }
 
             for (int j = 0; j < ((JSONArray) jsonArray.getJSONObject(i).get("properties")).length(); j++) {
                 JSONArray propertiesArray = new JSONArray(jsonArray.getJSONObject(i).get("properties").toString());
-                Iterator<String> propertyKeyNames= propertiesArray.getJSONObject(0).keys();
-                while(propertyKeyNames.hasNext()) {
-                   propertiesKeys.add(propertyKeyNames.next());
+                Iterator<String> propertyKeyNames = propertiesArray.getJSONObject(0).keys();
+                while (propertyKeyNames.hasNext()) {
+                    propertiesKeys.add(propertyKeyNames.next());
                 }
             }
-        }
+        }*/
     }
 
     public void getMultipleRequirements(String domain, String tokenType, String accessToken, String projectId) throws Exception {
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
-                .url("https://"+domain +"/api/v3/projects/"+projectId+"/requirements")
+                .url("https://" + domain + "/api/v3/projects/" + projectId + "/requirements")
                 .get()
-                .addHeader("authorization", tokenType+" "+accessToken)
+                .addHeader("authorization", tokenType + " " + accessToken)
                 .build();
 
         Response response = client.newCall(request).execute();
         JSONArray jsonArray = new JSONArray(response.body().string());
+        // System.out.println(jsonArray.toString());
         initRequirementAPI(jsonArray);
 
-       // JSONArray linkArray= new JSONArray(jsonArray.getJSONObject(0).get("links").toString());
-        for(int i=0; i<jsonArray.length();i++){
-            for(int j=0; j<((JSONArray) jsonArray.getJSONObject(i).get("links")).length();j++){
-                JSONArray linkArray= new JSONArray(jsonArray.getJSONObject(i).get("links").toString());
-                linkArray.forEach(linkItem-> {
-                    JSONObject linkObject = (JSONObject) linkItem;
-                    System.out.println(linkObject);
-                });
-            }
+        jsonToExcelParser = new JsonToExcelParser();
+        jsonToExcelParser.requirementLog(columnKeys,jsonArray);
 
-            for(int j=0; j<((JSONArray) jsonArray.getJSONObject(i).get("properties")).length();j++){
-                JSONArray propertiesArray= new JSONArray(jsonArray.getJSONObject(i).get("properties").toString());
-                propertiesArray.forEach(propertiesItem-> {
-                    JSONObject propertiesObject = (JSONObject) propertiesItem;
-                    System.out.println(propertiesObject.get("field_id"));
-                });
-            }
-            }
-        }
-
-       // excelParser = new ExcelParser();
-       // excelParser.createLog(jsonArray, "Requirements from Project "+projectId+"..");
-
+    }
 
 
 
@@ -89,8 +76,6 @@ public class RequirementAPI {
                 .build();
 
         Response response = client.newCall(request).execute();
-
-        getMultipleRequirements(domain, tokenType, accessToken, projectId);
 
     }
 
